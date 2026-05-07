@@ -1,18 +1,11 @@
 variable "aws_region" {
-  type    = string
   default = "ap-south-1"
 }
 
 variable "project_name" {
-  type    = string
+  default = "amazona-prod"
 }
 
-variable "environment" {
-  type    = string
-}
-
-variable "mongodb_uri" {
-  description = "The connection string for MongoDB Atlas"
-  type        = string
-  sensitive   = true
+variable "vpc_cidr" {
+  default = "10.0.0.0/16"
 }

@@ -1,6 +1,4 @@
 variable "project_name" {}
-variable "environment" {}
+variable "aws_region" {}
 variable "vpc_id" {}
-variable "public_subnet_ids" {}
-variable "private_subnet_ids" {}
-variable "mongodb_uri" {}
+variable "public_subnet_ids" { type = list(string) }
