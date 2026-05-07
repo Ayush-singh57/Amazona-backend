@@ -8,7 +8,7 @@ resource "aws_ecs_cluster" "main_cluster" {
   name = "${var.project_name}-cluster"
 }
 
-# 2. CloudWatch Logs (Explicitly created so container doesn't crash)
+# 2. CloudWatch Logs 
 resource "aws_cloudwatch_log_group" "ecs_logs" {
   name              = "/ecs/${var.project_name}-backend"
   retention_in_days = 7
@@ -87,7 +87,7 @@ resource "aws_lb_target_group" "ecs_tg" {
     timeout             = 30
     healthy_threshold   = 2
     unhealthy_threshold = 10
-    matcher             = "200-499" # God mode health check
+    matcher             = "200-499" #for health check
   }
 }
 
