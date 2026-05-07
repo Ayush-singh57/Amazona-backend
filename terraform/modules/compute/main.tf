@@ -120,7 +120,9 @@ resource "aws_ecs_task_definition" "backend_task" {
     environment = [
       { "name": "MONGO_URI", "value": "mongodb+srv://ayush221018it_db_user:6fc4sZ9IZU707VN2@cluster0.w4v1jkr.mongodb.net/?appName=Cluster0" },
       { "name": "MONGODB_URI", "value": "mongodb+srv://ayush221018it_db_user:6fc4sZ9IZU707VN2@cluster0.w4v1jkr.mongodb.net/?appName=Cluster0" },
-      { "name": "PORT", "value": "4000" }
+      { "name": "PORT", "value": "4000" },
+      { "name": "JWT_SECRET", "value": "tV9X+kLwM8j/q3nR5xZ7yB2vC4mN6pA1dF8gH0jKlQc=" },
+      { "name": "PAYPAL_CLIENT_ID", "value": "AZ3AO6xunOVljdjksyWW_1wnzZa93rqPiUqp69L-hlvnAyPsh6KX7tc9TMjCLOKF7mbj9-q57chphhYn" }
     ]
     
     logConfiguration = {
