@@ -22,15 +22,15 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build, tag, and push image to Amazon ECR
+    - name: Build, Tag, and Push Docker Image
       env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: amazona-backend-repo 
-        IMAGE_TAG: latest
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: amazona-prod-repo     
+          IMAGE_TAG: latest
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     - name: Force ECS Service to Restart
       run: |
-        aws ecs update-service --cluster amazona-prod-cluster --service amazona-backend-service --force-new-deployment
+             aws ecs update-service --cluster amazona-prod-cluster --service amazona-prod-service --force-new-deployment --region ap-south-1
