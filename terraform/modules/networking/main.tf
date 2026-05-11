@@ -1,4 +1,4 @@
-# 1. VPC
+# 1 VPC
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
@@ -6,7 +6,7 @@ resource "aws_vpc" "main" {
   tags = { Name = "${var.project_name}-vpc" }
 }
 
-# 2. Public Subnets (For ALB and Fargate)
+# 2 Public Subnets (For ALB and Fargate)
 resource "aws_subnet" "public_1" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
@@ -23,7 +23,7 @@ resource "aws_subnet" "public_2" {
   tags = { Name = "${var.project_name}-public-2" }
 }
 
-# 3. Internet Access
+# 3 Internet Access
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
   tags   = { Name = "${var.project_name}-igw" }

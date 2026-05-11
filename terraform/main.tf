@@ -11,7 +11,7 @@ provider "aws" {
   region = var.aws_region
 }
 
-# 1. Call the Networking Module
+# 1 Call the Networking Module
 module "networking" {
   source       = "./modules/networking"
   project_name = var.project_name
@@ -19,7 +19,7 @@ module "networking" {
   aws_region   = var.aws_region
 }
 
-# 2. Call the Compute Module 
+# 2 Call the Compute Module 
 module "compute" {
   source            = "./modules/compute"
   project_name      = var.project_name

@@ -1,4 +1,4 @@
-# 1. ECR & ECS Cluster
+# 1 ECR & ECS Cluster
 resource "aws_ecr_repository" "backend_repo" {
   name         = "${var.project_name}-repo"
   force_delete = true
@@ -8,13 +8,13 @@ resource "aws_ecs_cluster" "main_cluster" {
   name = "${var.project_name}-cluster"
 }
 
-# 2. CloudWatch Logs 
+# 2 CloudWatch Logs 
 resource "aws_cloudwatch_log_group" "ecs_logs" {
   name              = "/ecs/${var.project_name}-backend"
   retention_in_days = 7
 }
 
-# 3. IAM Role
+# 3 IAM Role
 resource "aws_iam_role" "ecs_execution_role" {
   name = "${var.project_name}-ecs-exec-role"
   assume_role_policy = jsonencode({
@@ -28,7 +28,7 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# 4. Security Groups
+# 4 Security Groups
 resource "aws_security_group" "alb_sg" {
   name   = "${var.project_name}-alb-sg"
   vpc_id = var.vpc_id
@@ -65,7 +65,7 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
-# 5. Load Balancer & Target Group
+# 5oad Balancer & Target Group
 resource "aws_lb" "main" {
   name               = "${var.project_name}-alb"
   internal           = false
@@ -102,7 +102,7 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# 6. ECS Task & Service
+# 6 ECS Task & Service
 resource "aws_ecs_task_definition" "backend_task" {
   family                   = "${var.project_name}-task"
   network_mode             = "awsvpc"
