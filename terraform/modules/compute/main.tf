@@ -1,34 +1,4 @@
-# 1 ECR & ECS Cluster
-resource "aws_ecr_repository" "backend_repo" {
-  name         = "${var.project_name}-repo"
-  force_delete = true
-}
-
-resource "aws_ecs_cluster" "main_cluster" {
-  name = "${var.project_name}-cluster"
-}
-
-# 2 CloudWatch Logs 
-resource "aws_cloudwatch_log_group" "ecs_logs" {
-  name              = "/ecs/${var.project_name}-backend"
-  retention_in_days = 7
-}
-
-# 3 IAM Role
-resource "aws_iam_role" "ecs_execution_role" {
-  name = "${var.project_name}-ecs-exec-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{ Action = "sts:AssumeRole", Effect = "Allow", Principal = { Service = "ecs-tasks.amazonaws.com" } }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
-  role       = aws_iam_role.ecs_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-# 4 Security Groups
+# 1. Security Groups
 resource "aws_security_group" "alb_sg" {
   name   = "${var.project_name}-alb-sg"
   vpc_id = var.vpc_id
@@ -52,10 +22,10 @@ resource "aws_security_group" "ecs_sg" {
   vpc_id = var.vpc_id
 
   ingress {
-    from_port   = 4000
-    to_port     = 4000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Open for testing
+    from_port       = 4000
+    to_port         = 4000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id]
   }
   egress {
     from_port   = 0
@@ -65,25 +35,25 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
-# 5oad Balancer & Target Group
+# 2. Application Load Balancer
 resource "aws_lb" "main" {
   name               = "${var.project_name}-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = var.public_subnet_ids
+  subnets            = var.public_subnets
 }
 
-resource "aws_lb_target_group" "ecs_tg" {
+resource "aws_lb_target_group" "main" {
   name        = "${var.project_name}-tg"
   port        = 4000
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
   target_type = "ip"
 
+  # THE PERMANENT HEALTH CHECK FIX
   health_check {
     path                = "/api/products"
-    protocol            = "HTTP"
     matcher             = "200-499"
     interval            = 60
     timeout             = 10
@@ -99,12 +69,33 @@ resource "aws_lb_listener" "http" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.ecs_tg.arn
+    target_group_arn = aws_lb_target_group.main.arn
   }
 }
 
-# 6 ECS Task & Service
-resource "aws_ecs_task_definition" "backend_task" {
+# 3. ECS Roles & Task Definition
+resource "aws_iam_role" "ecs_execution_role" {
+  name = "${var.project_name}-ecs-execution-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = { Service = "ecs-tasks.amazonaws.com" }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
+  role       = aws_iam_role.ecs_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_ecs_cluster" "main" {
+  name = "${var.project_name}-cluster"
+}
+
+resource "aws_ecs_task_definition" "main" {
   family                   = "${var.project_name}-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -114,44 +105,36 @@ resource "aws_ecs_task_definition" "backend_task" {
 
   container_definitions = jsonencode([{
     name      = "backend-container"
-    image     = "${aws_ecr_repository.backend_repo.repository_url}:latest"
+    image     = var.app_image
     essential = true
-    portMappings = [{ containerPort = 4000, hostPort = 4000, protocol = "tcp" }]
-    
-   environment = [
-  { "name": "MONGODB_URI", "value": "mongodb+srv://ayush221018it_db_user:6fc4sZ9IZU7O7VN2@cluster0.w4v1jkr.mongodb.net/amazona?appName=Cluster0" },
-  { "name": "PORT", "value": "4000" },
-  { "name": "JWT_SECRET", "value": "tV9X+kLwM8j/q3nR5xZ7yB2vC4mN6pA1dF8gH0jKlQc=" },
-  { "name": "PAYPAL_CLIENT_ID", "value": "AZ3A06xunOVljdjksyWW_1wnzZa93rqPiUqp69L-hlvnAyPsh6KX7tc9TMjCLOKF7mbj9-q57chphhYn" }
-]
-    
-    logConfiguration = {
-      logDriver = "awslogs"
-      options = {
-        "awslogs-group"         = aws_cloudwatch_log_group.ecs_logs.name
-        "awslogs-region"        = var.aws_region
-        "awslogs-stream-prefix" = "ecs"
-      }
-    }
+    portMappings = [{
+      containerPort = 4000
+      hostPort      = 4000
+    }]
+    # Add your environment variables here if needed
+    environment = [
+      { name = "NODE_ENV", value = "production" }
+    ]
   }])
 }
 
-resource "aws_ecs_service" "backend_service" {
+# 4. ECS Service
+resource "aws_ecs_service" "main" {
   name            = "${var.project_name}-service"
-  cluster         = aws_ecs_cluster.main_cluster.id
-  task_definition = aws_ecs_task_definition.backend_task.arn
-  desired_count   = 1
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.main.arn
+  desired_count   = 2
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = var.public_subnet_ids
+    subnets          = var.private_subnets
     security_groups  = [aws_security_group.ecs_sg.id]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_tg.arn
+    target_group_arn = aws_lb_target_group.main.arn
     container_name   = "backend-container"
     container_port   = 4000
   }
-} 
+}

@@ -11,19 +11,16 @@ provider "aws" {
   region = var.aws_region
 }
 
-# 1 Call the Networking Module
 module "networking" {
   source       = "./modules/networking"
   project_name = var.project_name
-  vpc_cidr     = var.vpc_cidr
-  aws_region   = var.aws_region
 }
 
-# 2 Call the Compute Module 
 module "compute" {
-  source            = "./modules/compute"
-  project_name      = var.project_name
-  aws_region        = var.aws_region
-  vpc_id            = module.networking.vpc_id
-  public_subnet_ids = module.networking.public_subnet_ids
+  source          = "./modules/compute"
+  project_name    = var.project_name
+  vpc_id          = module.networking.vpc_id
+  public_subnets  = module.networking.public_subnets
+  private_subnets = module.networking.private_subnets
+  app_image       = var.app_image
 }

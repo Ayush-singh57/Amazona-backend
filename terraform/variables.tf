@@ -3,9 +3,10 @@ variable "aws_region" {
 }
 
 variable "project_name" {
-  default = "amazona-prod"
+  default = "amazona-production"
 }
 
-variable "vpc_cidr" {
-  default = "10.0.0.0/16"
+variable "app_image" {
+  description = "The URL of your Docker image in ECR or DockerHub"
+  default     = "835637956758.dkr.ecr.ap-south-1.amazonaws.com/amazona-backend:latest" 
 }
