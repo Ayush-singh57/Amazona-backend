@@ -33,4 +33,4 @@ jobs:
 
     - name: Force ECS Service to Restart
       run: |
-             aws ecs update-service --cluster amazona-prod-cluster --service amazona-prod-service --force-new-deployment --region ap-south-1
+             aws ecs update-service --cluster amazona-prod-cluster --service amazona-prod-service --force-new-deployment --region ap-south-1  

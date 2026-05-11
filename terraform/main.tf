@@ -19,7 +19,7 @@ module "networking" {
   aws_region   = var.aws_region
 }
 
-# 2. Call the Compute Module (Passing outputs from networking!)
+# 2. Call the Compute Module 
 module "compute" {
   source            = "./modules/compute"
   project_name      = var.project_name
