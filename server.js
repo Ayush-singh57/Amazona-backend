@@ -2,23 +2,24 @@ import express from "express";
 import path from "path";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import cors from "cors"; // <--- WE ADDED THIS
+import cors from "cors"; 
 import seedRouter from "./routes/seedRoutes.js";
 import productRouter from "./routes/productRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import uploadRouter from "./routes/uploadRoutes.js";
-const express = require('express');
-const cors = require('cors');
 
 dotenv.config();
 
 const app = express();
 
-// 2. Add the CORS middleware right after 'app = express()'
+// Enable CORS for all domains so your React frontend can communicate with it
 app.use(cors({
-    origin: '*' // This allows all domains. For strict security, you can use 'https://d2l4pr350wqghp.cloudfront.net'
+    origin: '*' 
 }));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -28,12 +29,6 @@ mongoose
   .catch((err) => {
     console.log(err.message);
   });
-
-const app = express();
-
-app.use(cors()); // <--- WE ADDED THIS TO OPEN THE GUEST LIST
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/keys/paypal", (req, res) => {
   res.send(process.env.PAYPAL_CLIENT_ID || "sb");
@@ -48,13 +43,7 @@ app.use("/api/products", productRouter);
 app.use("/api/users", userRouter);
 app.use("/api/orders", orderRouter);
 
-// const __dirname = path.resolve();
-// app.use(express.static(path.join(__dirname, "/frontend/build")));
-// app.get("*", (req, res) =>
-//   res.sendFile(path.join(__dirname, "/frontend/build/index.html"))
-// );
-
-
+// Error Handling Middleware
 app.use((err, req, res, next) => {
   res.status(500).send({ message: err.message });
 });
