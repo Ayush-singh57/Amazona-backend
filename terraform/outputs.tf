@@ -8,7 +8,7 @@ output "ecr_repository_uri" {
   value       = module.backend_ecs.ecr_repository_url
 }
 
-# --- EXACT VALUES FOR GITHUB SECRETS ---
+# FOR GITHUB SECRETS
 output "SECRET_ECR_REPOSITORY" {
   description = "Name the GitHub Secret exactly: ECR_REPOSITORY"
   value       = "nodejs-backend-repo"

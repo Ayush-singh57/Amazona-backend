@@ -1,4 +1,4 @@
-# 1. ECR Repository (Where your Docker images will live)
+# 1. ECR Repository (Where Docker images will live)
 resource "aws_ecr_repository" "app_repo" {
   name                 = "${var.app_name}-repo"
   image_tag_mutability = "MUTABLE"
@@ -68,7 +68,7 @@ resource "aws_lb_target_group" "app_tg" {
     timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
-    matcher             = "200-499" # Ensures it doesn't fail if you don't have a specific /health route
+    matcher             = "200-499" # ensure it will not fail health routes 
   }
 }
 
@@ -127,7 +127,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name      = "${var.app_name}-container"
-      image     = "nginx:latest" # This is a placeholder. GitHub Actions will replace it with your Node app!
+      image     = "nginx:latest" # This is a placeholder. GitHub Actions will replace it with  Node app!
       essential = true
       portMappings = [{
         containerPort = var.app_port
