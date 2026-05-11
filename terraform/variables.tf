@@ -1,12 +1,17 @@
 variable "aws_region" {
-  default = "ap-south-1"
+  description = "The AWS region to deploy the infrastructure in"
+  type        = string
+  default     = "ap-south-1" # You can change this if needed
 }
 
-variable "project_name" {
-  default = "amazona-production"
+variable "mongo_uri" {
+  description = "MongoDB Connection String"
+  type        = string
+  default     = "mongodb+srv://ayush221018it_db_user:6fc4sZ9IZU707VN2@cluster0.w4v1jkr.mongodb.net/test"
 }
 
-variable "app_image" {
-  description = "The URL of your Docker image in ECR or DockerHub"
-  default     = "835637956758.dkr.ecr.ap-south-1.amazonaws.com/amazona-backend:latest" 
+variable "app_port" {
+  description = "The port the Node.js app is running on (spotted 4000 in your terminal)"
+  type        = number
+  default     = 4000
 }
