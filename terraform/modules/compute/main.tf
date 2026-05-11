@@ -113,7 +113,8 @@ resource "aws_ecs_task_definition" "main" {
     }]
     # Add your environment variables here if needed
     environment = [
-      { name = "NODE_ENV", value = "production" }
+      { name = "NODE_ENV", value = "production" },
+      { name = "MONGO_URI", value = "mongodb+srv://ayush221018it_db_user:6fc4sZ9IZU707VN2@cluster0.w4v1jkr.mongodb.net/?appName=Cluster0" }
     ]
   }])
 }
