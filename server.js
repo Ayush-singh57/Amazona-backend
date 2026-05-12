@@ -17,7 +17,7 @@ app.use(cors({
     origin: '*' 
 }));
 
-app.use(express.json());
+app.use(express.json()) ;
 app.use(express.urlencoded({ extended: true }));
 
 mongoose

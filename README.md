@@ -1,105 +1,194 @@
-🛒 Amazona E-Commerce - Backend API & Infrastructure
+<div align="center">
 
-This repository contains the Node.js/Express backend for the Amazona E-Commerce platform. It serves as a RESTful API providing product data, user authentication, and order processing capabilities.
+# 🛒 Amazona — E-Commerce Backend API
 
-Beyond the application code, this repository contains the Infrastructure as Code (IaC) and CI/CD pipelines used to deploy the application as a highly available, serverless containerized service on AWS.
+**Backend of amazona webpage**
+**deployed on AWS ECS Fargate with full Infrastructure as Code and automated CI/CD.**
 
-🚀 Tech Stack & Architecture
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
+[![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
+[![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com)
+[![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)](https://terraform.io)
 
-Runtime Environment: Node.js & Express.js
+</div>
 
-Database: MongoDB Atlas (Mongoose ODM)
+---
 
-Containerization: Docker
+## 📋 Table of Contents
 
-Cloud Provider: Amazon Web Services (AWS)
+- [Architecture Overview](#-architecture-overview)
+- [Tech Stack](#-tech-stack)
+- [Repository Structure](#-repository-structure)
+- [Cloud Infrastructure](#️-cloud-infrastructure-terraform)
+- [CI/CD Pipeline](#-cicd-pipeline)
+- [Local Development](#-local-development)
+- [CORS Configuration](#-cors-configuration)
 
-Compute: Amazon ECS (Elastic Container Service) on Fargate (Serverless)
+---
 
-Networking: Amazon Application Load Balancer (ALB), VPC, NAT Gateways
+## 🏗 Architecture Overview
 
-Infrastructure as Code (IaC): HashiCorp Terraform
+```
+Internet
+    │
+    ▼
+┌─────────────────────────────┐
+│  Application Load Balancer  │  ← Public Subnets
+└────────────┬────────────────┘
+             │
+    ┌────────▼────────┐
+    │   ECS Fargate   │  ← Private Subnets (Serverless Containers)
+    │  (Node/Express) │
+    └────────┬────────┘
+             │  NAT Gateway
+    ┌────────▼────────┐     ┌──────────────────┐
+    │  MongoDB Atlas  │     │   Amazon ECR     │
+    │   (Database)    │     │  (Docker Images) │
+    └─────────────────┘     └──────────────────┘
+```
 
-CI/CD: GitHub Actions
+The backend runs as a **serverless containerized service** on AWS Fargate — no servers to manage. All traffic enters through an **Application Load Balancer** in public subnets, which routes to private Fargate tasks. A **NAT Gateway** gives containers secure outbound access for image pulls and database connections.
 
-📂 Repository Structure
+---
 
-├── .github/workflows/
-│   └── backend-pipeline.yml  # Automated CI/CD deployment pipeline
-├── routes/                   # Express API routes (Products, Users, Orders)
-├── models/                   # Mongoose database schemas
-├── terraform/                # Infrastructure as Code (AWS ECS, VPC, ALB)
-├── Dockerfile                # Containerization blueprint
-├── server.js                 # Entry point & Express server setup
-└── package.json
+## 🚀 Tech Stack
 
+| Layer | Technology |
+|---|---|
+| **Runtime** | Node.js + Express.js |
+| **Database** | MongoDB Atlas (Mongoose ODM) |
+| **Containerization** | Docker |
+| **Cloud Provider** | Amazon Web Services (AWS) |
+| **Compute** | Amazon ECS on Fargate *(Serverless)* |
+| **Networking** | ALB · VPC · NAT Gateways |
+| **Infrastructure as Code** | HashiCorp Terraform |
+| **CI/CD** | GitHub Actions |
 
-☁️ Cloud Infrastructure (Terraform)
+---
 
-The infrastructure for this backend is fully automated via Terraform. It provisions:
+## 📂 Repository Structure
 
-Custom VPC with Public and Private Subnets.
+```
+amazona-backend/
+│
+├── 📁 .github/workflows/
+│   └── backend-pipeline.yml    # Automated CI/CD deployment pipeline
+│
+├── 📁 routes/                  # Express API routes
+│   ├── productRoutes.js        #   → Products
+│   ├── userRoutes.js           #   → Authentication & Users
+│   └── orderRoutes.js          #   → Orders
+│
+├── 📁 models/                  # Mongoose database schemas
+│
+├── 📁 terraform/               # Infrastructure as Code (AWS)
+│   ├── vpc.tf                  #   → VPC, Subnets, NAT Gateway
+│   ├── ecs.tf                  #   → ECS Cluster, Task Definitions
+│   ├── alb.tf                  #   → Application Load Balancer
+│   └── ecr.tf                  #   → Container Registry
+│
+├── 🐳 Dockerfile               # Containerization blueprint
+├── 🟢 server.js                # Entry point & Express server setup
+└── 📦 package.json
+```
 
-NAT Gateway to allow private Fargate tasks to securely pull images and connect to MongoDB Atlas.
+---
 
-Application Load Balancer (ALB) to route incoming HTTP traffic from the internet to the private containers.
+## ☁️ Cloud Infrastructure (Terraform)
 
-Amazon ECR to store versioned Docker images.
+The entire AWS infrastructure is defined as code and provisioned automatically. A single `terraform apply` builds everything from scratch.
 
-Amazon ECS Cluster & Task Definitions running on serverless AWS Fargate.
+### What Gets Provisioned
 
-To provision the infrastructure manually:
+> 🔹 **VPC** — Custom network with isolated Public and Private Subnets
+>
+> 🔹 **NAT Gateway** — Allows private Fargate tasks to securely reach the internet
+>
+> 🔹 **Application Load Balancer** — Routes external HTTP traffic to containers
+>
+> 🔹 **Amazon ECR** — Private registry for versioned Docker images
+>
+> 🔹 **Amazon ECS + Fargate** — Serverless cluster with Task Definitions and rolling deployments
 
+### Manual Provisioning
+
+```bash
 cd terraform
 terraform init
 terraform apply
+```
 
+---
 
-🔄 CI/CD Pipeline
+## 🔄 CI/CD Pipeline
 
-Deployments are fully automated. Pushing code to the main branch triggers the GitHub Actions workflow which:
+Every push to `main` triggers a fully automated deployment — **no manual steps required.**
 
-Authenticates securely with AWS.
+```
+git push → GitHub Actions
+               │
+               ├── 1️⃣  Authenticate with AWS (OIDC)
+               ├── 2️⃣  Build Docker image from latest code
+               ├── 3️⃣  Push image to Amazon ECR
+               ├── 4️⃣  Register new ECS Task Definition
+               └── 5️⃣  Trigger rolling update → ✅ Zero-downtime deploy
+```
 
-Builds a new Docker image from the latest code.
+The pipeline uses **GitHub Actions OIDC** for secure, keyless AWS authentication — no long-lived credentials stored in secrets.
 
-Pushes the Docker image to Amazon Elastic Container Registry (ECR).
+---
 
-Registers a new ECS Task Definition.
+## 💻 Local Development
 
-Triggers a rolling update on the ECS Service, ensuring zero-downtime deployments.
+### Prerequisites
 
-💻 Local Development
+- [Node.js](https://nodejs.org) (v18+)
+- A [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster or local MongoDB instance
 
-To run this backend API locally on your machine:
+### 1 · Install Dependencies
 
-Prerequisites
-
-Node.js installed
-
-A MongoDB Atlas Cluster (or local MongoDB instance)
-
-1. Install Dependencies
-
+```bash
 npm install
+```
 
+### 2 · Configure Environment Variables
 
-2. Environment Variables
+Create a `.env` file in the project root:
 
-Create a .env file in the root directory and add the following:
-
+```env
 PORT=4000
 MONGODB_URI=your_mongodb_connection_string
 PAYPAL_CLIENT_ID=your_paypal_client_id
 GOOGLE_API_KEY=your_google_api_key
+```
 
+> ⚠️ **Never commit your `.env` file.** Make sure it's listed in `.gitignore`.
 
-3. Run the Server
+### 3 · Start the Development Server
 
+```bash
 npm start
-# Server will start on http://localhost:4000
+```
 
+The API will be available at **`http://localhost:4000`** 🚀
 
-🔐 CORS Configuration
+---
 
-The backend is configured to accept requests via Cross-Origin Resource Sharing (CORS). For local development, it accepts requests from localhost. In production, ensure the origin in server.js is updated to match your live CloudFront frontend URL to maintain strict security.
+## 🔐 CORS Configuration
+
+CORS is configured in `server.js` to control which origins can access the API.
+
+| Environment | Allowed Origin |
+|---|---|
+| **Local Development** | `http://localhost:3000` |
+| **Production** | Your CloudFront frontend URL |
+
+> Before deploying to production, update the `origin` value in `server.js` to your live CloudFront URL to enforce strict cross-origin security.
+
+---
+
+<div align="center">
+
+</div>

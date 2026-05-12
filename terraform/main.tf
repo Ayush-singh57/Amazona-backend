@@ -11,13 +11,13 @@ provider "aws" {
   region = var.aws_region
 }
 
-# 1. Create the Networking Infrastructure (VPC, Subnets, NAT, IGW)
+# 1. Networking Infrastructure (VPC, Subnets, NAT, IGW)
 module "networking" {
   source   = "./modules/networking"
   vpc_cidr = "10.0.0.0/16"
 }
 
-# 2. Create the Backend Infrastructure (ECS, ECR, ALB, Security Groups)
+# 2. Backend Infrastructure (ECS, ECR, ALB, Security Groups)
 module "backend_ecs" {
   source             = "./modules/backend_ecs"
   vpc_id             = module.networking.vpc_id
