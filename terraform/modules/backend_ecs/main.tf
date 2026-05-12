@@ -1,11 +1,11 @@
-# 1. ECR Repository (Where Docker images will live)
+# 1. ECR Repository (Where Docker images will live) the purpose of this module is to create the ECR repository, ECS Fargate cluster, task definition, service, and Application Load Balancer
 resource "aws_ecr_repository" "app_repo" {
   name                 = "${var.app_name}-repo"
   image_tag_mutability = "MUTABLE"
   force_delete         = true
 }
 
-# 2. Security Groups
+# 2. Security Groups (ALB and ECS Fargate) the purpose of this module is to create the security groups for the Application Load Balancer and ECS Fargate tasks, allowing them to communicate securely
 resource "aws_security_group" "alb_sg" {
   name        = "${var.app_name}-alb-sg"
   description = "Allow HTTP inbound traffic to Load Balancer"
@@ -26,6 +26,7 @@ resource "aws_security_group" "alb_sg" {
   }
 }
 
+# ECS Fargate Security Group allows inbound traffic from ALB and outbound traffic to the internet (for pulling Docker images and sending logs to CloudWatch)
 resource "aws_security_group" "ecs_sg" {
   name        = "${var.app_name}-ecs-sg"
   description = "Allow inbound traffic from ALB to ECS Fargate tasks"
@@ -46,7 +47,7 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
-# 3. Application Load Balancer
+# 3. Application Load Balancer purpose of this module is to create the Application Load Balancer, target group, and listener to route traffic to the ECS Fargate tasks
 resource "aws_lb" "main" {
   name               = "${var.app_name}-alb"
   internal           = false
@@ -55,6 +56,7 @@ resource "aws_lb" "main" {
   subnets            = var.public_subnet_ids
 }
 
+# Target Group and Listener are defined in the same module to ensure they are created together and properly linked to the ALB and ECS service
 resource "aws_lb_target_group" "app_tg" {
   name        = "${var.app_name}-tg"
   port        = var.app_port
@@ -64,14 +66,15 @@ resource "aws_lb_target_group" "app_tg" {
 
   health_check {
     path                = "/"
-    interval            = 30
-    timeout             = 5
+    interval            = 30 
+    timeout             = 5 
     healthy_threshold   = 2
     unhealthy_threshold = 2
     matcher             = "200-499" # ensure it will not fail health routes 
   }
 }
-
+ 
+# purpose of this module is to create the Application Load Balancer, target group, and listener to route traffic to the ECS Fargate tasks
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = "80"
@@ -83,7 +86,7 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# 4. IAM Roles for ECS
+# 4. IAM Roles for ECS pupose of this module is to create the IAM roles required for ECS Fargate task execution and task role, allowing the tasks to pull images from ECR and send logs to CloudWatch
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.app_name}-ecs-execution-role"
   assume_role_policy = jsonencode({

@@ -11,7 +11,7 @@ variable "mongo_uri" {
 }
 
 variable "app_port" {
-  description = "The port the Node.js app is running on (spotted 4000 in your terminal)"
+  description = "The port the Node.js app is running on (spotted 4000 in terminal)"
   type        = number
   default     = 4000
 }
