@@ -191,6 +191,4 @@ CORS is configured in `server.js` to control which origins can access the API.
 
 <div align="center">
 
-Built with ❤️ · Powered by AWS & Node.js
-
 </div>
