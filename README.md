@@ -2,7 +2,7 @@
 
 # 🛒 Amazona — E-Commerce Backend API
 
-**A production-grade, serverless RESTful API built with Node.js & Express,**
+**Backend of amazona webpage**
 **deployed on AWS ECS Fargate with full Infrastructure as Code and automated CI/CD.**
 
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
